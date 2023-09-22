@@ -1,0 +1,49 @@
+{
+  "name": "wms-firebase-pwa",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "firebase": "NODE_OPTIONS=\"--max_old_space_size=3072\" firebase emulators:start  --import emulatorDataExport",
+    "firebase-restart": "firebase emulators:start",
+    "firebase-export": "firebase emulators:export ./emulatorDataExport",
+    "firebase-clear": "rm -rf ./emulatorDataExport",
+    "dev": "vite",
+    "clear:cache": "vite cache:clear",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.0.17",
+    "@hookform/resolvers": "^3.0.1",
+    "@types/numeral": "^2.0.2",
+    "apexcharts": "^3.42.0",
+    "country-telephone-data": "^0.6.3",
+    "firebase": "^9.19.1",
+    "moment": "^2.29.4",
+    "numeral": "^2.0.6",
+    "react": "^18.2.0",
+    "react-apexcharts": "^1.4.1",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.43.9",
+    "react-hot-toast": "^2.4.0",
+    "react-icons": "^4.8.0",
+    "react-router-dom": "^6.10.0",
+    "react-select": "^5.7.3",
+    "reactfire": "^4.2.2",
+    "use-copy": "^0.0.2",
+    "workbox-window": "^6.5.4",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react-swc": "^3.0.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.3.1",
+    "typescript": "^4.9.3",
+    "vite": "^4.2.0",
+    "vite-plugin-pwa": "^0.14.7"
+  }
+}

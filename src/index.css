@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .mini-form .form {
+    @apply flex flex-row flex-wrap items-baseline bg-gray-200/30 text-sm font-light justify-between border rounded;
+  }
+
+  .mini-form .form .btn {
+    @apply p-1 px-3 w-fit self-end mb-2;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply block min-h-[auto] border w-full rounded  bg-transparent py-[0.32rem] px-3 leading-[1.6] outline-none transition-all duration-200 ease-linear;
+  }
+
+  .btn {
+    @apply text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-400 font-medium rounded-lg text-sm px-4 py-2 md:px-5 md:py-2.5 mr-1 md:mr-2 inline-flex items-center justify-center gap-2  focus:outline-none;
+  }
+
+  .cfg-btn span[role='button'] {
+    @apply bg-white hover:text-blue-500;
+  }
+
+  .icon-button-filled {
+    @apply text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center mr-2;
+  }
+  .icon-button-outline {
+    @apply text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center;
+  }
+  .menu-link {
+    @apply text-gray-500  hover:text-blue-600;
+  }
+  .ring-btn {
+    @apply inline-flex items-center p-2 my-2 ml-3 text-sm text-blue-500 rounded-lg md:hidden hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200;
+  }
+  td {
+    @apply border-x;
+  }
+  .check-label {
+    @apply flex items-center justify-around;
+  }
+  /* 
+  .order-cart .form:not(form .form) {
+    @apply rounded gap-1 mx-0 max-w-full p-2 justify-between w-[100%!important];
+  }
+  .order-cart .form:not(form .form) > .btn:last-child {
+    @apply max-w-[150px];
+  }
+
+  .order-cart .form:not(.mini-form .form) > div > label {
+    @apply text-lg mx-0 ;
+  } */
+
+  .order-cart .form:not(.mini-form .form) > div > label {
+    @apply font-semibold mx-0;
+  }
+  .order-cart .form:not(.mini-form .form) > div > label {
+    @apply text-base mx-0;
+  }
+}
+
+.firebase-emulator-warning {
+  display: none;
+}

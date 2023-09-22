@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "default": "melo-wms-test",
+    "staging": "melo-wms-stage",
+    "dev": "melo-wms-test",
+    "prod1": "melo-wms"
+  },
+  "targets": {},
+  "etags": {
+    "melo-wms-stage": {
+      "extensionInstances": {
+        "firestore-send-email": "3bf8c26b775b911e05fd36cc08a032c1d8cd1faa03ba6462e620c8d42014fa66"
+      }
+    }
+  }
+}

@@ -1,0 +1,254 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    match /{document=**} {
+    	allow read, write: if request.auth != null && "superAdmin" in request.auth.token &&  request.auth.token.superAdmin == true;
+    }
+ 
+    
+    function isFromCompany(company) {
+      return request.auth != null && company != null && "tinnumber" in request.auth.token && company == request.auth.token.tinnumber;
+    }
+    
+    function isAdmin() {
+      return request.auth != null && "admin" in request.auth.token && request.auth.token.admin == true;
+    }
+    function isManager() {
+      return request.auth != null &&  "manager" in request.auth.token && request.auth.token.manager == true;
+    }
+    function isBranchManager(company, branch) {
+      return isManager() &&  isFromBranch(company, branch);
+    }
+
+    function isFromBranch(company, branch) {
+      return isFromCompany(company) && branch != null && "branch" in request.auth.token && request.auth.token.branch == branch;
+    }
+    
+    function isCompanyAdmin(company) {
+      return isAdmin() && isFromCompany(company);
+    }
+
+    function hasPath(resource) {
+      return resource.data != null && "path" in resource.data && resource.data.keys().hasAll(["path"]) &&  resource.data.path != null;
+    }
+
+    match /default_roles/{default_role} {
+      allow read: if request.auth != null;
+    }
+    
+    match /companies/{company} {
+      allow read: if request.auth.token.tinnumber == company;
+
+      match /company_stats/{company_stats} {
+        allow read: if isCompanyAdmin(company)
+      }
+      match /company_banks/{company_bank} {
+        allow read, write: if isCompanyAdmin(company)
+      }
+      
+      match /grants/{grant} {
+        allow read: if  isCompanyAdmin(company) || isBranchManager(company, request.auth.token.branch)
+        allow write: if isCompanyAdmin(company) 
+        
+        match /grant_transactions/{grant_transaction} {
+          allow read, write: if isCompanyAdmin(company) 
+        }
+      }
+      
+    }
+    // Allow rules to access users / Order matters
+    match /{path=**}/users/{user} {
+      allow read: if isCompanyAdmin(resource.data.tinnumber) || isBranchManager(resource.data.tinnumber, resource.data.branch);
+    }
+
+    match /{path=**}/branch_expenses/{branch_expense} {
+    	allow read: if hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(resource.data.path.companies, resource.data.path.branches));
+    }
+
+    match /{path=**}/suppliers/{supplier} {
+    	allow read: if hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(resource.data.path.companies, request.auth.token.branch));
+    }
+
+    match /{path=**}/purchases/{purchase} {
+    	allow read: if hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(resource.data.path.companies, resource.data.path.branches));
+    }
+
+    match /{path=**}/sells_items/{sell_items} {
+    	allow read: if hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(resource.data.path.companies, resource.data.path.branches));
+    }
+    
+
+    match /{path=**}/orders/{order} {
+    	allow read: if hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(resource.data.path.companies, resource.data.path.branches));
+    }
+    match /{path=**}/items_taken/{items_taken} {
+    	allow read: if true//hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(resource.data.path.companies, resource.data.path.branches));
+    }
+    match /{path=**}/invoices/{invoice} {
+    	allow read: if hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(resource.data.path.companies, resource.data.path.branches));
+    }
+    match /{path=**}/sells/{sell} {
+    	allow read: if hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(resource.data.path.companies, resource.data.path.branches));
+    }
+    match /{path=**}/inventory/{inventory} {
+      // allow read, write: if resource.data.path.exists() && resource.data.path.hasAll(["companies"]);  
+      allow read:  if  hasPath(resource) && resource.data.path.companies == request.auth.token.tinnumber;
+    }
+
+    match /{path=**}/roles/{role} {
+      allow read, write: if hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(resource.data.path.companies, resource.data.path.branches));
+    }
+
+    match /companies/{company}/branches/{branch}/suppliers/{supplier}/purchases/{purchase} {
+    	allow write: if isCompanyAdmin(company) || isBranchManager(company, branch);
+    }
+    
+    match /companies/{company}/branches/{branch}/roles/{role} {
+      allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch));
+    }
+
+    match /companies/{company}/admins/{admin} {
+    	// Admin from the same company can read
+    	allow read: if isCompanyAdmin(company);
+      
+    }
+
+    match /{path=**}/branches/{branch} {
+      allow read: if isCompanyAdmin(request.auth.token.tinnumber) || isBranchManager(request.auth.token.tinnumber, request.auth.token.branch);
+    }
+    
+    match /companies/{company}/branches/{branch} {
+    	// allow  read, write: if hasPath(resource) && (isCompanyAdmin(resource.data.path.companies) || isBranchManager(branch));
+      allow write: if isCompanyAdmin(company)
+      allow read: if isCompanyAdmin(request.auth.token.tinnumber) || isBranchManager(company, request.auth.token.branch);
+
+      match /fillable_groups/{fillable_group} {
+        allow read, write: if isCompanyAdmin(request.auth.token.tinnumber) || isBranchManager(request.auth.token.tinnumber, request.auth.token.branch);
+      }
+      match /damaged_products/{damaged_product} {
+        allow read, write: if isCompanyAdmin(request.auth.token.tinnumber) || isBranchManager(request.auth.token.tinnumber, request.auth.token.branch);
+      }
+      match /checked_damaged_products/{checked_damaged_product} {
+        allow read, write: if isCompanyAdmin(request.auth.token.tinnumber) || isBranchManager(request.auth.token.tinnumber, request.auth.token.branch);
+      }
+      match /returned_products/{returned_product} {
+        allow read, write: if isCompanyAdmin(request.auth.token.tinnumber) || isBranchManager(request.auth.token.tinnumber, request.auth.token.branch);
+      }
+      match /transfers/{transfer} {
+        allow read, write: if isCompanyAdmin(request.auth.token.tinnumber) || isBranchManager(request.auth.token.tinnumber, request.auth.token.branch);
+      }
+      match /branch_stats/{branch_stats} {
+        allow read, write: if isCompanyAdmin(request.auth.token.tinnumber) || isBranchManager(request.auth.token.tinnumber, request.auth.token.branch);
+      }
+      match /branch_fillables/{branch_fillable} {
+        allow read, write: if isCompanyAdmin(request.auth.token.tinnumber) || isBranchManager(company, request.auth.token.branch);
+        
+        match /items_taken/{item} {
+          allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+        } 
+        match /empties_returns/{empties_return} {
+          allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+        } 
+      }
+      match /branch_expenses/{branch_expense} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      }
+      match /empties_stock/{empties_stock} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      }
+      match /checked_empties/{checked_empties} {
+         allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      }
+      match /sorted_empties/{sorted_empties} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      }
+      match /sorted_checked_empties/{sorted_checked_empties} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      }
+      match /supplier_empties_returns/{supplier_empties_return} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      }
+    }
+    
+    match /companies/{company}/branches/{branch}/users/{user} {
+    	// allow write: if  hasPath(request.resource) && isCompanyAdmin(request.resource.data.path.companies);
+      allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch));
+      match /sales_cart/{sales_cart} {
+        allow read, write: if request.auth != null && ((resource == null || resource.data == null) || ( 'uids' in resource.data && request.auth.uid in resource.data.uids));
+      }
+      match /transfer_cart/{transfer_cart} {
+        allow read, write: if request.auth != null && ((resource == null || resource.data == null) || ( 'uids' in resource.data && request.auth.uid in resource.data.uids));
+      }
+    } 
+
+    match /companies/{company}/branches/{branch}/locations/{location} {
+    	// allow write: if  hasPath(request.resource) && isCompanyAdmin(request.resource.data.path.companies);
+      allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch));
+    }
+    
+    match /companies/{company}/branches/{branch}/inventory/{inventory} {
+    	allow read, write: if isCompanyAdmin(company) || isFromBranch(company, branch);
+    }
+    match /companies/{company}/branches/{branch}/inventory/{inventory}/allocations/{allocation} {
+    	allow read, write: if isCompanyAdmin(company) || isFromBranch(company, branch);
+    }
+
+    match /companies/{company}/branches/{branch}/sells/{sell} {
+    	allow read, write: if isCompanyAdmin(company) || isBranchManager(company, branch);
+    }
+
+    match /companies/{company}/branches/{branch}/suppliers/{supplier}/invoices/{invoice} {
+    	allow read, create: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      allow delete, update: if (isCompanyAdmin(company) || isBranchManager(company, branch)) // && (resource.data.confirmed != true);
+    }
+
+    match /companies/{company}/branches/{branch}/customers/{customer} {
+    	allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      
+      match /customer_empties/{customer_empty} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      } 
+      match /items_taken/{item} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      } 
+      match /customer_finances/{customer_finance} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      } 
+      match /empties_returns/{empties_return} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      } 
+      match /orders/{order} {
+        allow read, write: if (isCompanyAdmin(company) || isBranchManager(company, branch))
+      }
+    }
+
+    match /companies/{company}/branches/{branch}/suppliers/{supplier}/invoices/{invoice}/purchases/{purchase} {
+    	allow read, create: if isCompanyAdmin(company) || isBranchManager(company, branch)
+      allow delete, update: if (isCompanyAdmin(company) || isBranchManager(company, branch)) //&& ( resource.data.confirmed != true);
+    }
+
+    match /companies/{company}/branches/{branch}/sells/{sell}/sells_items/{sell_items} {
+      allow read, write: if isCompanyAdmin(company) || isBranchManager(company, branch);
+      allow delete, update: if isCompanyAdmin(company) || isBranchManager(company, branch) //&& (resource.data.confirmed != true);
+    }
+
+    match /companies/{company}/branches/{branch}/suppliers/{supplier} {
+    	allow read, write: if isCompanyAdmin(company) || isBranchManager(company, branch);
+    }
+   
+    match /items/{item} {
+    	allow read, write: if request.auth != null;
+    }
+
+    match /permissions/{item} { 
+      allow write: if false;
+      allow read: if isManager() || isAdmin();
+    }
+
+    match /defaultroles/{item} {
+      allow read, write: if false;
+    }
+    
+  }
+}
