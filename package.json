@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "firebase": "NODE_OPTIONS=\"--max_old_space_size=3072\" firebase emulators:start  --import emulatorDataExport",
+    "firebase": "firebase emulators:start  --import emulatorDataExport",
     "firebase-restart": "firebase emulators:start",
     "firebase-export": "firebase emulators:export ./emulatorDataExport",
     "firebase-clear": "rm -rf ./emulatorDataExport",

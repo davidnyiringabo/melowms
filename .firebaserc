@@ -1,7 +1,7 @@
 {
   "projects": {
-    "default": "melo-wms-test",
-    "staging": "melo-wms-stage",
+    "default": "melo-wms",
+    "staging": "melo-wms",
     "dev": "melo-wms-test",
     "prod1": "melo-wms"
   },
